@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sidebar-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 2rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Progress Bar Animation */
+@keyframes progress-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(-40%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress-bar {
+  animation: progress-bar 1.2s ease-in-out infinite;
+}
+
+/* Custom Slider */
+
+.player_slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.player_slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  background-color: #a855f7; /* Tailwind purple-500 */
+  border-radius: 9999px;
+  cursor: pointer;
+  position: relative;
+  z-index: 20;
+}
+
+.player_slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  background-color: #a855f7;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  position: relative;
+  z-index: 20;
+}
