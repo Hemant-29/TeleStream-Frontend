@@ -11,13 +11,13 @@ import RandomVideos from "../components/RandomVideos";
 // Import Icons
 import like_thumbsUp from "../assets/like.svg";
 import share from "../assets/share.svg";
-import { loginContext, userContext } from "../context/context";
+import { loginContext, urlContext, userContext } from "../context/context";
 import VideoPlayer from "../components/VideoPlayer";
 import { getColorFromLetter } from "../services/color";
 
 const Watch = () => {
   // Constants
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
   const { videoID } = useParams();
 
   // State Variables

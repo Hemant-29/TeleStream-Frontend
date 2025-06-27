@@ -6,3 +6,5 @@ export const loginContext = createContext({
 });
 
 export const userContext = createContext({});
+
+export const urlContext = createContext("");

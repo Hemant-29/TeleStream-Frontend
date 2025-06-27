@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginContext, userContext } from "../context/context";
+import { loginContext, urlContext, userContext } from "../context/context";
 import axios from "axios";
 
 // Components
@@ -9,7 +9,7 @@ import Sidebar from "../components/Sidebar";
 import VideoCard from "../components/VideoCard";
 
 const Subscriptions = () => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
 
   // State Variables
   const [subscriptionDetails, setSubscriptionDetails] = useState([]);

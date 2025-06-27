@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { loginContext, userContext } from "./context/context.js";
+import { loginContext, userContext, urlContext } from "./context/context.js";
 import axios from "axios";
 
 // Import Pages
@@ -18,6 +18,9 @@ import Upload from "./pages/Upload.jsx";
 import User from "./pages/user.jsx";
 
 function App() {
+  // SETUP BASE URL
+  const baseUrl = "http://localhost:5000";
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -61,9 +64,6 @@ function App() {
   // State Variables
   const [loggedinState, setLoggedinState] = useState(false);
   const [userDetails, setUserDetails] = useState({});
-
-  // Use Context
-  const baseUrl = "http://localhost:5000";
 
   // ________________________________Functions________________________________
   // Function to Verify Login
@@ -116,11 +116,13 @@ function App() {
 
   return (
     <>
-      <userContext.Provider value={{ userDetails, refreshUser: fetchUser }}>
-        <loginContext.Provider value={loggedinState}>
-          <RouterProvider router={router} />
-        </loginContext.Provider>
-      </userContext.Provider>
+      <urlContext.Provider value={baseUrl}>
+        <userContext.Provider value={{ userDetails, refreshUser: fetchUser }}>
+          <loginContext.Provider value={loggedinState}>
+            <RouterProvider router={router} />
+          </loginContext.Provider>
+        </userContext.Provider>
+      </urlContext.Provider>
     </>
   );
 }

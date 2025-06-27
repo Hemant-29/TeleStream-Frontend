@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginContext, userContext } from "../context/context";
+import { loginContext, urlContext, userContext } from "../context/context";
 import axios from "axios";
 
 import logo from "../assets/play.png";
@@ -13,7 +13,7 @@ import accountIcon from "../assets/account.svg";
 import { getColorFromLetter } from "../services/color";
 
 const Navbar = () => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
 
   // State Variables
   const [searchTerm, setSearchTerm] = useState("");

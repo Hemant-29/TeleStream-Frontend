@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { urlContext } from "../context/context";
 import axios from "axios";
 
 const VideoPlayer = ({ videoDetails }) => {
-  // _________________________________Functions_________________________________
+  const baseUrl = useContext(urlContext);
 
   // State Variables
   const [isViewSent, setIsViewSent] = useState(false);
@@ -43,7 +44,7 @@ const VideoPlayer = ({ videoDetails }) => {
         // Call the view API
         axios
           .post(
-            `${baseUrl}/api/v1/video/view/${videoID}`,
+            `${baseUrl}/api/v1/video/view/${videoDetails._id}`,
             {},
             { withCredentials: true }
           )
@@ -133,6 +134,10 @@ const VideoPlayer = ({ videoDetails }) => {
       video.removeEventListener("loadedmetadata", updateDuration);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("video Details:", videoDetails);
+  }, [videoDetails]);
 
   useEffect(() => {
     // Set Volume whenever state changes

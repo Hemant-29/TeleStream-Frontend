@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { userContext } from "../context/context";
+import { urlContext, userContext } from "../context/context";
 import { Link, useParams } from "react-router-dom";
 import { getColorFromLetter } from "../services/color";
 
@@ -12,7 +12,7 @@ import binIcon from "../assets/dustbin.svg";
 
 const User = () => {
   // constants
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
 
   // Use Context
   const { userDetails, refreshUser } = useContext(userContext);

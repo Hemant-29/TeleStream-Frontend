@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
@@ -7,9 +7,10 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import VideoCard from "../components/VideoCard";
 import { getColorFromLetter } from "../services/color";
+import { urlContext } from "../context/context";
 
 const Search = () => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
 
   const location = useLocation();
 

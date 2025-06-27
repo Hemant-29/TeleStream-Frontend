@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginContext } from "../context/context";
+import { loginContext, urlContext } from "../context/context";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
 
 const Upload = () => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
   const navigate = useNavigate();
   const loggedinState = useContext(loginContext);
 

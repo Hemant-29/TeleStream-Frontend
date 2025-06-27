@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 
 import VideoCard from "../components/VideoCard";
+import { urlContext } from "../context/context";
 
 const RandomVideos = ({ videoIDtoRemove }) => {
   // constants
-  const base_Url = "http://localhost:5000";
+  const base_Url = useContext(urlContext);
 
   // State variables
   const [allVideos, setAllVideos] = useState([]);

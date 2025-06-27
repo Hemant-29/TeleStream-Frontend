@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { urlContext } from "../context/context";
 
 const Login = () => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = useContext(urlContext);
 
   // State Variables
   const [username, setUsername] = useState("");
