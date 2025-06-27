@@ -15,11 +15,12 @@ import Signup from "./pages/Signup.jsx";
 import Search from "./pages/Search.jsx";
 import Watch from "./pages/Watch.jsx";
 import Upload from "./pages/Upload.jsx";
-import User from "./pages/user.jsx";
+import User from "./pages/User.jsx";
 
 function App() {
   // SETUP BASE URL
   const baseUrl = "https://telestream-backend.onrender.com";
+  // const baseUrl = "http://localhost:5000";
 
   const router = createBrowserRouter([
     {
