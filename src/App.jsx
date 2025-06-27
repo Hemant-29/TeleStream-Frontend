@@ -19,7 +19,7 @@ import User from "./pages/user.jsx";
 
 function App() {
   // SETUP BASE URL
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = "https://telestream-backend.onrender.com";
 
   const router = createBrowserRouter([
     {
