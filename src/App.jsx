@@ -21,8 +21,8 @@ import ChangePassword from "./pages/ChangePassword.jsx";
 
 function App() {
   // SETUP BASE URL
-  const baseUrl = "https://telestream-backend.onrender.com";
-  // const baseUrl = "http://localhost:5000";
+  // const baseUrl = "https://telestream-backend.onrender.com";
+  const baseUrl = "http://localhost:5000";
 
   const router = createBrowserRouter([
     {
