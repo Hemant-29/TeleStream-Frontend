@@ -79,7 +79,7 @@ const VideoPlayer = ({ videoDetails }) => {
 
   // ___Functions for video controls___
   // Play Pause the video
-  const playControls = () => {
+  const TogglePlay = () => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
@@ -91,6 +91,28 @@ const VideoPlayer = ({ videoDetails }) => {
       }, 1000);
     }
     setIsPlaying((prev) => !prev);
+  };
+
+  const TogglePlayTouch = () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      if (!isMobile) {
+        videoRef.current.pause();
+      }
+      setControlsShow(true);
+    } else {
+      if (!isMobile) {
+        videoRef.current.play();
+      }
+      setTimeout(() => {
+        setControlsShow(false);
+      }, 1000);
+    }
+    if (!isMobile) {
+      setIsPlaying((prev) => !prev);
+    }
   };
 
   // Set the progress of the progress bar
@@ -220,10 +242,18 @@ const VideoPlayer = ({ videoDetails }) => {
   }, []);
 
   useEffect(() => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
     // Effect to auto-hide controls 1s after last mouse move
     const interval = setInterval(() => {
-      if (Date.now() - lastMouseMoveTime > 1000 && !isHoveringControls) {
-        setControlsShow(false);
+      if (!isMobile) {
+        if (Date.now() - lastMouseMoveTime > 2000 && !isHoveringControls) {
+          setControlsShow(false);
+        }
+      } else {
+        if (Date.now() - lastMouseMoveTime > 3000 && !isHoveringControls) {
+          setControlsShow(false);
+        }
       }
     }, 200);
 
@@ -257,7 +287,7 @@ const VideoPlayer = ({ videoDetails }) => {
 
       <div
         className="absolute top-0 h-full w-full z-10"
-        onClick={playControls}
+        onClick={() => TogglePlayTouch()}
         onDoubleClick={toggleFullScreen}
       ></div>
       {/* Video Playback Controls */}
@@ -301,7 +331,7 @@ const VideoPlayer = ({ videoDetails }) => {
               className="flex flex-row sm:gap-2 items-center"
             >
               {/* Play Button */}
-              <button onClick={playControls} className="w-12 aspect-square">
+              <button onClick={TogglePlay} className="w-12 aspect-square">
                 {isPlaying ? (
                   <svg
                     height="100%"
