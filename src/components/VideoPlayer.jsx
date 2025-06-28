@@ -18,6 +18,8 @@ const VideoPlayer = ({ videoDetails }) => {
   const [expandedSetting, setExpandedSetting] = useState(false);
   const [expandedSpeed, setExpandedSpeed] = useState(false);
   const [controlsShow, setControlsShow] = useState(false);
+  const [lastMouseMoveTime, setLastMouseMoveTime] = useState(Date.now());
+  const [isHoveringControls, setIsHoveringControls] = useState(false);
 
   // Use Ref Hooks
   const videoRef = useRef(null);
@@ -81,8 +83,12 @@ const VideoPlayer = ({ videoDetails }) => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
+      setControlsShow(true);
     } else {
       videoRef.current.play();
+      setTimeout(() => {
+        setControlsShow(false);
+      }, 1000);
     }
     setIsPlaying((prev) => !prev);
   };
@@ -97,14 +103,39 @@ const VideoPlayer = ({ videoDetails }) => {
   };
 
   // Toggle Full Screen
-  const toggleFullScreen = () => {
+  const toggleFullScreen = async () => {
     const videoContainer = videoRef.current?.parentElement;
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
     if (!document.fullscreenElement) {
-      videoContainer?.requestFullscreen();
-      setFullScreen(true);
+      try {
+        // Enter fullscreen
+        await videoContainer?.requestFullscreen();
+        setFullScreen(true);
+
+        // Rotate to landscape on mobile
+        if (isMobile && screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape").catch((err) => {
+            console.warn("Orientation lock failed:", err);
+          });
+        }
+      } catch (err) {
+        console.error("Fullscreen error:", err);
+      }
     } else {
-      document.exitFullscreen();
-      setFullScreen(false);
+      try {
+        // Exit fullscreen
+        await document.exitFullscreen();
+        setFullScreen(false);
+
+        // Unlock orientation back to default
+        if (isMobile && screen.orientation?.unlock) {
+          screen.orientation.unlock(); // optional; most browsers reset automatically
+        }
+      } catch (err) {
+        console.error("Exit fullscreen error:", err);
+      }
     }
   };
 
@@ -188,11 +219,25 @@ const VideoPlayer = ({ videoDetails }) => {
     };
   }, []);
 
+  useEffect(() => {
+    // Effect to auto-hide controls 1s after last mouse move
+    const interval = setInterval(() => {
+      if (Date.now() - lastMouseMoveTime > 1000 && !isHoveringControls) {
+        setControlsShow(false);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [lastMouseMoveTime]);
+
   // ______________________________________JSX______________________________________
   return (
     <div
       className="relative w-full h-[30rem] rounded-lg overflow-hidden shadow-md bg-black"
-      onMouseEnter={() => setControlsShow(true)}
+      onMouseMove={() => {
+        setLastMouseMoveTime(Date.now());
+        setControlsShow(true);
+      }}
       onMouseLeave={() => {
         setControlsShow(false);
         setExpandedSetting(false);
@@ -212,13 +257,16 @@ const VideoPlayer = ({ videoDetails }) => {
 
       <div
         className="absolute top-0 h-full w-full z-10"
-        // style={fullScreen ? { height: "43rem" } : { height: "25rem" }}
         onClick={playControls}
         onDoubleClick={toggleFullScreen}
       ></div>
       {/* Video Playback Controls */}
       {controlsShow && (
-        <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/70 to-transparent text-white flex flex-col gap-0 z-20">
+        <div
+          className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/70 to-transparent text-white flex flex-col gap-0 z-20"
+          onMouseMove={() => setIsHoveringControls(true)}
+          onMouseLeave={() => setIsHoveringControls(false)}
+        >
           {/* Playback Slider */}
           <div className="relative w-full h-1 bg-neutral-600/70  rounded-full overflow-hidden">
             {/* Filled progress */}
@@ -246,10 +294,11 @@ const VideoPlayer = ({ videoDetails }) => {
             className="player_slider w-full h-2 appearance-none bg-transparent pointer-events-auto relative bottom-1.5 z-10"
           />
 
+          {/* Control Bar */}
           <div className="flex items-center justify-between">
             <div
               id="player-left_buttons"
-              className="flex flex-row gap-2 items-center"
+              className="flex flex-row sm:gap-2 items-center"
             >
               {/* Play Button */}
               <button onClick={playControls} className="w-12 aspect-square">
@@ -283,13 +332,14 @@ const VideoPlayer = ({ videoDetails }) => {
                   </svg>
                 )}
               </button>
+
               <div
                 onMouseEnter={() => setShowVolume(true)}
                 onMouseLeave={() => setShowVolume(false)}
                 className="flex flex-row items-center"
               >
                 <button
-                  className="w-12 aspect-square"
+                  className="w-10 sm:w-12 aspect-square"
                   onClick={() => setVolume((prev) => (prev > 0 ? 0 : 50))}
                 >
                   {volume == 0 && (
@@ -416,7 +466,7 @@ const VideoPlayer = ({ videoDetails }) => {
 
             <div
               id="player-right_buttons"
-              className="relative flex flex-row gap-2 items-center pl-10"
+              className="relative flex flex-row sm:gap-2 items-center"
             >
               {/* Quality Settings Button */}
               <button
@@ -424,7 +474,7 @@ const VideoPlayer = ({ videoDetails }) => {
                   setExpandedSetting((prev) => !prev);
                   setExpandedSpeed(false);
                 }}
-                className="w-12 aspect-square"
+                className="w-10 sm:w-12 aspect-square"
               >
                 <svg
                   height="100%"
@@ -461,7 +511,7 @@ const VideoPlayer = ({ videoDetails }) => {
                   setExpandedSpeed((prev) => !prev);
                   setExpandedSetting(false);
                 }}
-                className="flex justify-center items-center w-12 aspect-square"
+                className="flex justify-center items-center w-10 sm:w-12 aspect-square"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -506,7 +556,10 @@ const VideoPlayer = ({ videoDetails }) => {
               )}
 
               {/* Fullscreen Button */}
-              <button onClick={toggleFullScreen} className="w-12 aspect-square">
+              <button
+                onClick={toggleFullScreen}
+                className="w-10 sm:w-12 aspect-square"
+              >
                 {fullScreen ? (
                   <svg
                     height="100%"

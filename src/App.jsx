@@ -16,6 +16,8 @@ import Search from "./pages/Search.jsx";
 import Watch from "./pages/Watch.jsx";
 import Upload from "./pages/Upload.jsx";
 import User from "./pages/User.jsx";
+import Account from "./pages/Account.jsx";
+import ChangePassword from "./pages/ChangePassword.jsx";
 
 function App() {
   // SETUP BASE URL
@@ -59,6 +61,14 @@ function App() {
     {
       path: "/:userID",
       element: <User />,
+    },
+    {
+      path: "/account",
+      element: <Account />,
+    },
+    {
+      path: "/changePassword",
+      element: <ChangePassword />,
     },
   ]);
 
