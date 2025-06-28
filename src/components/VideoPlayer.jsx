@@ -17,7 +17,7 @@ const VideoPlayer = ({ videoDetails }) => {
   const [fullScreen, setFullScreen] = useState(false);
   const [expandedSetting, setExpandedSetting] = useState(false);
   const [expandedSpeed, setExpandedSpeed] = useState(false);
-  const [controlsShow, setControlsShow] = useState(false);
+  const [controlsShow, setControlsShow] = useState(true);
   const [lastMouseMoveTime, setLastMouseMoveTime] = useState(Date.now());
   const [isHoveringControls, setIsHoveringControls] = useState(false);
 
@@ -109,7 +109,7 @@ const VideoPlayer = ({ videoDetails }) => {
     }
     setTimeout(() => {
       setControlsShow(false);
-    }, 2000);
+    }, 3000);
     if (!isMobile) {
       setIsPlaying((prev) => !prev);
     }
@@ -223,6 +223,8 @@ const VideoPlayer = ({ videoDetails }) => {
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
+    setControlsShow(true);
+    setLastMouseMoveTime(Date.now());
     playedTimeRef.current = 0;
     setIsViewSent(false);
     if (videoRef.current) {
