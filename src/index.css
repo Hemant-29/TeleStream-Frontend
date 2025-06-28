@@ -26,6 +26,7 @@ button {
   cursor: pointer;
 }
 
+/* Value Field class in the Account page */
 .account-valuefield {
   display: inline;
   width: 15rem;
