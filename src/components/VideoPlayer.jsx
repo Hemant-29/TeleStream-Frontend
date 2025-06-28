@@ -277,7 +277,7 @@ const VideoPlayer = ({ videoDetails }) => {
   // ______________________________________JSX______________________________________
   return (
     <div
-      className="relative w-full h-[30rem] rounded-lg overflow-hidden shadow-md bg-black"
+      className="relative w-full h-fit sm:h-[30rem] rounded-lg overflow-hidden shadow-md bg-black"
       onMouseMove={() => {
         setLastMouseMoveTime(Date.now());
         setControlsShow(true);
