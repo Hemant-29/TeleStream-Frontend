@@ -106,10 +106,10 @@ const VideoPlayer = ({ videoDetails }) => {
       if (!isMobile) {
         videoRef.current.play();
       }
-      setTimeout(() => {
-        setControlsShow(false);
-      }, 1000);
     }
+    setTimeout(() => {
+      setControlsShow(false);
+    }, 2000);
     if (!isMobile) {
       setIsPlaying((prev) => !prev);
     }
@@ -158,6 +158,18 @@ const VideoPlayer = ({ videoDetails }) => {
       } catch (err) {
         console.error("Exit fullscreen error:", err);
       }
+    }
+  };
+
+  // Toggle Volume
+  const volumeToggle = () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (!isMobile) {
+      setVolume((prev) => (prev > 0 ? 0 : 50));
+    }
+    if (isMobile) {
+      setShowVolume((prev) => !prev);
     }
   };
 
@@ -363,6 +375,7 @@ const VideoPlayer = ({ videoDetails }) => {
                 )}
               </button>
 
+              {/* Volume Button */}
               <div
                 onMouseEnter={() => setShowVolume(true)}
                 onMouseLeave={() => setShowVolume(false)}
@@ -370,7 +383,7 @@ const VideoPlayer = ({ videoDetails }) => {
               >
                 <button
                   className="w-10 sm:w-12 aspect-square"
-                  onClick={() => setVolume((prev) => (prev > 0 ? 0 : 50))}
+                  onClick={volumeToggle}
                 >
                   {volume == 0 && (
                     <svg
