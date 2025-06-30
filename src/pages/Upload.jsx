@@ -17,6 +17,8 @@ const Upload = () => {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [noteMessage, setNoteMessage] = useState("");
+  const [uploaded, setUploaded] = useState(false);
 
   // Function to handle file upload
   const handleUpload = async (e) => {
@@ -47,9 +49,12 @@ const Upload = () => {
           withCredentials: true,
         }
       );
-
+      setUploaded(true);
       console.log("Upload success:", response.data);
       setUploadMessage("Video uploaded successfully!");
+      setNoteMessage(
+        "Note: The video is currently being processed up to 1080p quality. It may be temporarily unavailable until processing is complete."
+      );
     } catch (error) {
       console.error("Upload error:", error.response?.data || error.message);
       setUploadMessage(error.response?.data?.message || "Upload failed.");
@@ -85,7 +90,6 @@ const Upload = () => {
                 className="w-full p-2 rounded bg-neutral-800 border border-neutral-600"
               />
             </div>
-
             <div>
               <textarea
                 value={description}
@@ -94,7 +98,6 @@ const Upload = () => {
                 className="w-full p-2 h-32 rounded bg-neutral-800 border border-neutral-600"
               ></textarea>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1">
                 Video File<span className="text-red-500">*</span>
@@ -107,7 +110,6 @@ const Upload = () => {
                 className="text-sm bg-neutral-600 h-12 w-40 sm:w-60 p-3 rounded-2xl"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-1">
                 Thumbnail Image<span className="text-red-500">*</span>
@@ -120,7 +122,6 @@ const Upload = () => {
                 className="text-sm bg-neutral-600 h-12 w-40 sm:w-60 p-3 rounded-2xl"
               />
             </div>
-
             {uploadMessage && (
               <div
                 className={`text-sm ${
@@ -132,14 +133,16 @@ const Upload = () => {
                 {uploadMessage}
               </div>
             )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 ml-4 rounded text-white transition"
-            >
-              {isLoading ? "Uploading..." : "Upload Video"}
-            </button>
+            {<div className="text-sm text-yellow-400">{noteMessage}</div>}
+            {!uploaded && (
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 ml-4 rounded text-white transition"
+              >
+                {isLoading ? "Uploading..." : "Upload Video"}
+              </button>
+            )}
           </form>
         </div>
       </div>

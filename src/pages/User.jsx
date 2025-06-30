@@ -136,7 +136,7 @@ const User = () => {
                 </div>
                 <p>{channelUser.videos.length} videos</p>
 
-                {userDetails &&
+                {userDetails.subscribedChannels &&
                 userDetails.subscribedChannels.includes(channelUser._id) ? (
                   <button
                     className="px-6 py-3 rounded-2xl text-white bg-neutral-600 "

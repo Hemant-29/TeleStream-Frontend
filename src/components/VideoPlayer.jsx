@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { urlContext } from "../context/context";
 import axios from "axios";
+import Hls from "hls.js";
 
 const VideoPlayer = ({ videoDetails }) => {
   const baseUrl = useContext(urlContext);
@@ -15,16 +16,19 @@ const VideoPlayer = ({ videoDetails }) => {
   const [volume, setVolume] = useState(100);
   const [showVolume, setShowVolume] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
+  const [videoQuality, setVideoQuality] = useState(-1);
   const [expandedSetting, setExpandedSetting] = useState(false);
   const [expandedSpeed, setExpandedSpeed] = useState(false);
   const [controlsShow, setControlsShow] = useState(true);
   const [lastMouseMoveTime, setLastMouseMoveTime] = useState(Date.now());
   const [isHoveringControls, setIsHoveringControls] = useState(false);
+  const [timeatQualityChange, setTimeatQualityChange] = useState(0);
 
   // Use Ref Hooks
   const videoRef = useRef(null);
   const timerRef = useRef(null);
   const playedTimeRef = useRef(0); // accumulated real playback time
+  const hlsRef = useRef(null);
 
   // __________________________________Functions__________________________________
   // Functions to add a view to the video using a timer
@@ -83,35 +87,28 @@ const VideoPlayer = ({ videoDetails }) => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
-      setControlsShow(true);
     } else {
       videoRef.current.play();
-      setTimeout(() => {
-        setControlsShow(false);
-      }, 1000);
     }
-    setIsPlaying((prev) => !prev);
   };
 
+  // Play Pause the video when tapped on the screen
   const TogglePlayTouch = () => {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (!videoRef.current) return;
-    if (isPlaying) {
-      if (!isMobile) {
+    if (!isMobile) {
+      if (isPlaying) {
         videoRef.current.pause();
-      }
-      setControlsShow(true);
-    } else {
-      if (!isMobile) {
+      } else {
         videoRef.current.play();
       }
     }
-    setTimeout(() => {
-      setControlsShow(false);
-    }, 3000);
-    if (!isMobile) {
-      setIsPlaying((prev) => !prev);
+    if (isMobile) {
+      setControlsShow(true);
+      setTimeout(() => {
+        setControlsShow(false);
+      }, 3000);
     }
   };
 
@@ -181,6 +178,18 @@ const VideoPlayer = ({ videoDetails }) => {
     setExpandedSpeed(false);
   };
 
+  // Set the Current VideoQuality
+  const toggleVideoQuality = (quality) => {
+    console.log("quality pressed:", quality);
+    setVideoQuality(quality);
+    setExpandedSetting(false);
+
+    // Set the time at which quality is being changed
+    if (!videoRef.current) return;
+    setTimeatQualityChange(videoRef.current.currentTime);
+    console.log("Time at QualityChange:", videoRef.current.currentTime);
+  };
+
   // _________________________________Use Effect_________________________________
 
   useEffect(() => {
@@ -201,6 +210,23 @@ const VideoPlayer = ({ videoDetails }) => {
   }, []);
 
   useEffect(() => {
+    // Handle Video Play Pause
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  useEffect(() => {
     console.log("video Details:", videoDetails);
   }, [videoDetails]);
 
@@ -212,67 +238,107 @@ const VideoPlayer = ({ videoDetails }) => {
   }, [volume]);
 
   useEffect(() => {
-    // Go to the video player
+    // Scroll to video player
     window.scrollTo({
       top,
       behavior: "smooth",
     });
 
-    // Reset video states when new video loads
+    // Reset states
     setProgress(0);
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
     setControlsShow(true);
+    setVideoQuality(-1);
     setLastMouseMoveTime(Date.now());
     playedTimeRef.current = 0;
     setIsViewSent(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
 
-    // play the video
     if (!videoRef.current) return;
-    videoRef.current.play();
-    setIsPlaying((prev) => !prev);
+
+    // Reset video
+    videoRef.current.pause();
+    videoRef.current.currentTime = 0;
+
+    // Wait until video is ready to play
+    const handleCanPlay = () => {
+      videoRef.current.play();
+      videoRef.current.removeEventListener("canplay", handleCanPlay);
+    };
+
+    videoRef.current.addEventListener("canplay", handleCanPlay);
   }, [videoDetails._id]);
 
   useEffect(() => {
-    // Handle the video ending
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      console.log("Video playback ended");
-    };
-
-    video.addEventListener("ended", handleEnded);
-
-    return () => {
-      video.removeEventListener("ended", handleEnded);
-    };
-  }, []);
-
-  useEffect(() => {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    // Effect to auto-hide controls 1s after last mouse move
+    // To auto-hide controls 1s after last mouse move
     const interval = setInterval(() => {
-      if (!isMobile) {
-        if (Date.now() - lastMouseMoveTime > 2000 && !isHoveringControls) {
-          setControlsShow(false);
-        }
-      } else {
-        if (Date.now() - lastMouseMoveTime > 3000 && !isHoveringControls) {
-          setControlsShow(false);
-        }
+      if (Date.now() - lastMouseMoveTime > 3000 && !isHoveringControls) {
+        setControlsShow(false);
+        setExpandedSetting(false);
+        setExpandedSpeed(false);
       }
     }, 200);
 
     return () => clearInterval(interval);
   }, [lastMouseMoveTime]);
+
+  useEffect(() => {
+    // Toggle Video Quality using HLS
+    const getFileExtension = (filename) =>
+      filename.split(".").pop().toLowerCase();
+    if (
+      !videoDetails.videoUrl ||
+      getFileExtension(videoDetails.videoUrl) != "m3u8"
+    )
+      return;
+
+    const src = videoDetails.videoUrl;
+    const video = videoRef.current;
+
+    // Destroy existing instance if present
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        maxBufferLength: 5, // In seconds
+        maxMaxBufferLength: 5, // In seconds
+        maxBufferSize: 5 * 1000 * 1000, // In MB
+      });
+
+      hlsRef.current = hls;
+      hls.loadSource(src);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        hls.currentLevel = videoQuality; // This alone disables auto
+
+        // Resume playback if paused
+        if (video.paused) {
+          video.play().catch(console.error);
+        }
+        // Set the playback time back to where it was
+        if (!videoRef.current) return;
+        videoRef.current.currentTime = timeatQualityChange;
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS.js error:", data);
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [videoDetails.videoUrl, videoQuality]);
 
   // ______________________________________JSX______________________________________
   return (
@@ -283,9 +349,7 @@ const VideoPlayer = ({ videoDetails }) => {
         setControlsShow(true);
       }}
       onMouseLeave={() => {
-        setControlsShow(false);
-        setExpandedSetting(false);
-        setExpandedSpeed(false);
+        setLastMouseMoveTime(Date.now());
       }}
     >
       <video
@@ -536,17 +600,65 @@ const VideoPlayer = ({ videoDetails }) => {
                 </svg>
               </button>
               {expandedSetting && (
-                <div className="absolute bottom-16 right-1/2 bg-neutral-600/60 backdrop-blur-xs rounded-xl w-20">
-                  {[1080, 480, 240].map((resolution) => {
-                    return (
-                      <div
-                        onClick={() => setExpandedSetting(false)}
-                        className="px-4 py-2 cursor-pointer hover:bg-neutral-700/70 hover:rounded-xl"
-                      >
-                        {resolution + "p"}
-                      </div>
-                    );
-                  })}
+                <div className="absolute bottom-16 right-1/2 bg-neutral-600/60 backdrop-blur-xs rounded-xl">
+                  {[1080, 720, 480, 360, 240, 144, "Auto"].map(
+                    (resolution, index) => {
+                      return (
+                        <div
+                          onClick={() => toggleVideoQuality(5 - index)}
+                          className="px-4 py-2 cursor-pointer hover:bg-neutral-700/70 hover:rounded-xl"
+                        >
+                          {resolution != "Auto" ? (
+                            <div className="flex flex-row items-center">
+                              {videoQuality == 5 - index ? (
+                                <>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20px"
+                                    height="20px"
+                                    viewBox="30 35 36 28"
+                                  >
+                                    <g transform="translate(26.386363636363633, 64.1590909090909)">
+                                      <path
+                                        d="M16.77-4.23L5.18-15.75 7.77-18.41 16.77-9.55 35.39-28.09 38.05-25.43 16.77-4.23Z"
+                                        fill="#ffffff"
+                                      />
+                                    </g>
+                                  </svg>
+                                  <p className="ml-[5px]">{resolution}p</p>
+                                </>
+                              ) : (
+                                <p className="ml-[25px]">{resolution}p</p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-row items-center">
+                              {videoQuality == 5 - index ? (
+                                <>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20px"
+                                    height="20px"
+                                    viewBox="30 35 36 28"
+                                  >
+                                    <g transform="translate(26.386363636363633, 64.1590909090909)">
+                                      <path
+                                        d="M16.77-4.23L5.18-15.75 7.77-18.41 16.77-9.55 35.39-28.09 38.05-25.43 16.77-4.23Z"
+                                        fill="#ffffff"
+                                      />
+                                    </g>
+                                  </svg>
+                                  <p className="ml-[5px]">{resolution}</p>
+                                </>
+                              ) : (
+                                <p className="ml-[25px]">{resolution}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from "axios";
 
 import Navbar from "../components/Navbar";
@@ -6,9 +6,11 @@ import Sidebar from "../components/Sidebar";
 import VideoCard from "../components/VideoCard";
 import { urlContext } from "../context/context";
 
-const Home = () => {
+const Home = ({ src }) => {
   // constants
   const base_Url = useContext(urlContext);
+
+  const videoRef = useRef();
 
   // State variables
   const [allVideos, setAllVideos] = useState([]);
@@ -36,6 +38,8 @@ const Home = () => {
   useEffect(() => {
     console.log(allVideos);
   }, [allVideos]);
+
+  
 
   return (
     <>
