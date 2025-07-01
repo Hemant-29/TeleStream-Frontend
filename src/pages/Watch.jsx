@@ -89,6 +89,8 @@ const Watch = () => {
         );
         console.log("Like video response:", response.data);
         refreshUser();
+      } else {
+        window.alert("Login to like the video");
       }
     } catch (error) {
       console.error(error);
@@ -103,6 +105,9 @@ const Watch = () => {
       "with id:",
       videoDetails.userID
     );
+    if (!loggedinState) {
+      window.alert("Login to subscribe channel");
+    }
     if (videoDetails.userID) {
       try {
         const response = await axios.post(
@@ -210,7 +215,7 @@ const Watch = () => {
               </button>
             ) : (
               <button
-                className="cursor-pointer bg-neutral-700 rounded-2xl px-4 py-2"
+                className="cursor-pointer bg-neutral-50 text-black rounded-2xl px-4 py-2"
                 onClick={subscribeChannel}
               >
                 Subscribe
@@ -238,7 +243,7 @@ const Watch = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-              Like
+              {videoDetails.likes && videoDetails.likes.length} Likes
             </button>
             <button className="flex gap-2 items-center cursor-pointer bg-neutral-700 rounded-2xl px-4 py-2">
               <img src={share} alt="" />

@@ -153,7 +153,7 @@ const Navbar = () => {
 
           <Link to="/account" className="flex gap-2 items-center">
             <img src={accountIcon} alt="upload" />
-            Go to Account
+            Your Account
           </Link>
           <Link to="/upload" className="flex gap-2 items-center w-[25px]">
             <img src={uploadIcon} alt="upload" />
